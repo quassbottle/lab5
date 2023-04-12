@@ -1,0 +1,32 @@
+body {
+    margin: 0;
+}
+
+#main {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+.figure {
+    width: 100px;
+    height: 100px;
+    position: absolute;
+}
+
+.figure.circle {
+    border-radius: 50%;
+}
+
+.figure.red {
+    background: red;
+}
+
+.figure.blue {
+    background: blue;
+}
+
+.figure.green {
+    background: green;
+}
