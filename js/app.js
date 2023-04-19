@@ -14,11 +14,26 @@ class Collider {
 
 $(() => {
    const container = $("#main");
+   const amount = $("#amount");
+
+   let counter = 0;
+   let figuresUpdate;
    let figures = [];
 
-   setInterval(instantiateFigureUpdate, 250);
+   $(document).on("click", "#start", () => {
+       figuresUpdate = setInterval(instantiateFigureUpdate, 250);
+       counter = Math.min(100, Math.max(1, amount.val()));
+       amount.val(counter);
+       container.empty();
+       figures = [];
+   });
 
    function instantiateFigureUpdate() {
+       if (counter <= 0) {
+           clearInterval(figuresUpdate);
+           return false;
+       }
+
        const figure = $(`<div class="figure ${next(10) % 2 === 0 ? "circle" : ""}"></div>`);
        const size = next(75, 25);
        figure.width(size);
@@ -27,7 +42,7 @@ $(() => {
        let start = getRandomPoint(container, size);
        let dest = getRandomPoint(container, size);
 
-       if (start.x === dest.x || start.y === dest.y) return;
+       if (start.x === dest.x || start.y === dest.y) return false;
 
        figure.css({
            "left": start.x + "px",
@@ -60,21 +75,25 @@ $(() => {
 
            figures.filter((f) => {
                return f !== figure;
-           }).forEach((f) => {
+           }).some((f) => {
                let col2 = getCollider(f);
-               if (col1.intersectsWith(col2)) {
+               if (col2.intersectsWith(col1)) {
                    clearInterval(update);
 
-                   console.log(col1, col2);
-                   console.log(figures);
-
                    createParticles(figure);
+                   createParticles(f);
 
                    destroyFigure(f);
                    destroyFigure(figure);
+
+                   return true;
                }
            })
        }, 1);
+
+       counter--;
+       console.log(counter);
+       return true;
    }
 
    function destroyFigure(figure) {
@@ -85,7 +104,7 @@ $(() => {
    }
 
    function createParticles(figure) {
-       for (let i = 3; i < next(6, 4); i++) {
+       for (let i = 0; i < 3; i++) {
            const particle = $(`<div class="figure"></div>`);
            const size = 25;
            particle.width(size);
