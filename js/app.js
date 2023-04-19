@@ -6,12 +6,11 @@ class Collider {
     }
 
     intersectsWith(collider) {
-        let x = collider.x >= this.x && collider.x <= this.x + this.size;
-        let y = collider.y >= this.y && collider.y <= this.y + this.size;
-        return x && y;
+        if (this.x >= collider.x + collider.size || collider.x >= this.x + this.size) return false;
+        if (this.y >= collider.y + collider.size || collider.y >= this.y + this.size) return false;
+        return true;
     }
 }
-
 
 $(() => {
    const container = $("#main");
@@ -20,13 +19,10 @@ $(() => {
    setInterval(instantiateFigureUpdate, 250);
 
    function instantiateFigureUpdate() {
-
        const figure = $(`<div class="figure ${next(10) % 2 === 0 ? "circle" : ""}"></div>`);
        const size = next(75, 25);
        figure.width(size);
        figure.height(size);
-       //const x = next(container.width() - size) + "px";
-       //const y = next(container.height() - size) + "px";
 
        let start = getRandomPoint(container, size);
        let dest = getRandomPoint(container, size);
@@ -67,14 +63,18 @@ $(() => {
            }).forEach((f) => {
                let col2 = getCollider(f);
                if (col1.intersectsWith(col2)) {
+                   clearInterval(update);
+
                    console.log(col1, col2);
+                   console.log(figures);
+
+                   createParticles(figure);
+
                    destroyFigure(f);
                    destroyFigure(figure);
-                   clearInterval(update);
                }
            })
        }, 1);
-
    }
 
    function destroyFigure(figure) {
@@ -84,7 +84,30 @@ $(() => {
        figure.remove();
    }
 
+   function createParticles(figure) {
+       for (let i = 3; i < next(6, 4); i++) {
+           const particle = $(`<div class="figure"></div>`);
+           const size = 25;
+           particle.width(size);
+           particle.height(size);
 
+           let dest = getRandomPoint(container, size);
+
+           particle.css({
+              "left": figure.css("left"),
+              "top": figure.css("top"),
+              "background": "red"
+           });
+
+           particle.animate({
+               "left": dest.x + "px",
+               "top": dest.y + "px",
+               "opacity": 0
+           }, 2500, "linear");
+
+           container.append(particle);
+       }
+   }
 
    function getRandomPoint(container, size) {
        let x = next(10) % 2 === 0 ? -size : container.width();
@@ -117,52 +140,3 @@ $(() => {
        return Math.floor(Math.random() * (max - min) + min);
    }
 });
-
-
-// // setup
-// let initialSpeed = 10;
-//
-// // dynamic
-// let x = 0;
-// let y = 0;
-//
-// let velocity = {
-//     x: initialSpeed,
-//     y: initialSpeed
-// };
-//
-// window.setInterval(() => {
-//     tick();
-//
-// }, 50)
-//
-// window.setInterval(() => {
-//     fixedUpdate();
-// }, 1);
-//
-// function tick() {
-//     move(figure, velocity)
-// }
-//
-// function fixedUpdate() {
-//     x = figure.css("left").replace("px", "") - 0;
-//     y = figure.css("top").replace("px", "") - 0;
-//
-//     $("#debug").text(`X: ${x} Y: ${y}`);
-// }
-//
-// function move(figure, velocity) {
-//     x = figure.css("left").replace("px", "") - 0;
-//     y = figure.css("top").replace("px", "") - 0;
-//
-//     let newX = x + velocity.x;
-//     let newY = y + velocity.y;
-//
-//     figure.animate({
-//         left: `=${clamp(0, container.width() - figure.width(),  newX)}`,
-//         top: `=${clamp(0, container.height() - figure.height(), newY)}`}, 50, "linear");
-// }
-//
-// function clamp(min, max, val) {
-//     return Math.max(min, Math.min(max, val))
-// }
